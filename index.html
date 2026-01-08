@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Terminal</title>
+<style>
+body {
+  margin: 0;
+  background: black;
+  color: #00ff00;
+  font-family: monospace;
+  padding: 20px;
+}
+.line {
+  display: flex;
+  gap: 8px;
+}
+.check {
+  color: #00ff00;
+}
+.loading {
+  width: 100%;
+  height: 16px;
+  border: 1px solid #00ff00;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.bar {
+  height: 100%;
+  width: 0%;
+  background: #00ff00;
+  animation: glitch 0.15s infinite;
+}
+@keyframes glitch {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+.final {
+  color: red;
+  font-size: 22px;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+<div id="term"></div>
+
+<script>
+const term = document.getElementById("term");
+
+function add(text, done=false) {
+  const d = document.createElement("div");
+  d.className = "line";
+  d.innerHTML = done ? `<span class="check">✓</span><span>${text}</span>` : `<span>${text}</span>`;
+  term.appendChild(d);
+}
+
+setTimeout(() => add("Initializing connection..."), 500);
+setTimeout(() => add("Initializing connection", true), 2000);
+
+setTimeout(() => add("Bypassing security..."), 2500);
+setTimeout(() => add("Bypassing security", true), 4000);
+
+setTimeout(() => add("Extracting data..."), 4500);
+setTimeout(() => add("Extracting data", true), 6000);
+
+setTimeout(() => {
+  add("IP FOUND!");
+  add("***.**.***.**");
+}, 7000);
+
+setTimeout(() => {
+  add("Connecting to network...");
+  const box = document.createElement("div");
+  box.className = "loading";
+  box.innerHTML = `<div class="bar" id="bar"></div>`;
+  term.appendChild(box);
+
+  let w = 0;
+  const bar = document.getElementById("bar");
+  const i = setInterval(() => {
+    w++;
+    bar.style.width = w + "%";
+    if (w >= 100) clearInterval(i);
+  }, 140);
+}, 9000);
+
+setTimeout(() => {
+  const f = document.createElement("div");
+  f.className = "final";
+  f.textContent = "GET TROLLED NOOB";
+  term.appendChild(f);
+}, 24000);
+</script>
+</body>
+</html>
