@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Google</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  background:black;
+  overflow:hidden;
+  font-family:Arial,Helvetica,sans-serif;
+}
+#start{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:32px;
+  cursor:pointer;
+  user-select:none;
+}
+.chaos{
+  position:fixed;
+  font-weight:bold;
+  pointer-events:none;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+
+/* Fake Google login */
+#login{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+#card{
+  width:90%;
+  max-width:360px;
+  border:1px solid #dadce0;
+  border-radius:8px;
+  padding:32px;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+#glogo{
+  text-align:center;
+  font-size:36px;
+  font-weight:700;
+  letter-spacing:-1px;
+  margin-bottom:16px;
+}
+#glogo span:nth-child(1){color:#4285f4}
+#glogo span:nth-child(2){color:#ea4335}
+#glogo span:nth-child(3){color:#fbbc05}
+#glogo span:nth-child(4){color:#4285f4}
+#glogo span:nth-child(5){color:#34a853}
+#glogo span:nth-child(6){color:#ea4335}
+
+h2{margin:8px 0 4px 0;font-weight:500;text-align:center}
+p{margin:0 0 16px 0;color:#5f6368;text-align:center;font-size:14px}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:12px 0;
+  font-size:16px;
+  border:1px solid #dadce0;
+  border-radius:4px;
+}
+button{
+  width:100%;
+  padding:10px;
+  margin-top:12px;
+  background:#1a73e8;
+  color:white;
+  border:none;
+  border-radius:4px;
+  font-size:15px;
+}
+.note{
+  margin-top:14px;
+  font-size:12px;
+  color:#5f6368;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="start">TAP TO CONTINUE</div>
+
+<div id="login">
+  <div id="card">
+    <div id="glogo">
+      <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+    </div>
+    <h2>Sign in</h2>
+    <p>Use your Google Account</p>
+    <input id="email" placeholder="Email or phone">
+    <input id="pass" type="password" placeholder="Password">
+    <button id="signin">Next</button>
+    <div class="note">Parody screen — nothing is sent or saved.</div>
+  </div>
+</div>
+
+<script>
+let started=false;
+let ctx;
+let chaosTimers=[];
+
+function start(){
+  if(started) return;
+  started=true;
+  document.getElementById("start").remove();
+
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  ctx.resume();
+
+  speak("you should not have clicked");
+
+  chaosTimers.push(setInterval(soundLoop,260));
+  chaosTimers.push(setInterval(visualChaos,120));
+  chaosTimers.push(setInterval(distort,200));
+
+  setTimeout(showLogin,6000);
+}
+
+function sound(freq,dur){
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.type="square";
+  o.frequency.value=freq;
+  o.connect(g);
+  g.connect(ctx.destination);
+  g.gain.value=0.18;
+  o.start();
+  o.stop(ctx.currentTime+dur);
+}
+
+function soundLoop(){
+  sound(200+Math.random()*900,0.07);
+}
+
+function visualChaos(){
+  document.body.style.background=
+    `hsl(${Math.random()*360},100%,50%)`;
+
+  const d=document.createElement("div");
+  d.className="chaos";
+  d.textContent=["TROLLED","LOL","ERROR","RUN","WHY","NOPE"][Math.floor(Math.random()*6)];
+  d.style.left=Math.random()*100+"%";
+  d.style.top=Math.random()*100+"%";
+  d.style.color=`hsl(${Math.random()*360},100%,50%)`;
+  d.style.fontSize=(24+Math.random()*72)+"px";
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),900);
+}
+
+function distort(){
+  document.body.style.filter=
+    `hue-rotate(${Math.random()*360}deg) blur(${Math.random()*1.5}px)`;
+}
+
+function clearChaos(){
+  chaosTimers.forEach(t=>clearInterval(t));
+  chaosTimers=[];
+  document.body.style.filter="none";
+  document.body.style.background="#fff";
+  document.querySelectorAll(".chaos").forEach(e=>e.remove());
+}
+
+function showLogin(){
+  clearChaos();
+  document.getElementById("login").style.display="flex";
+
+  // Discard inputs immediately (parody only)
+  const wipe=()=>setTimeout(()=>{
+    email.value=""; pass.value="";
+    speak("nice try");
+  },150);
+
+  email.addEventListener("input",wipe);
+  pass.addEventListener("input",wipe);
+  signin.addEventListener("click",()=>{
+    email.value=""; pass.value="";
+    speak("trolled");
+    shake();
+  });
+}
+
+function shake(){
+  const c=document.getElementById("card");
+  c.animate([
+    {transform:"translateX(0)"},
+    {transform:"translateX(-6px)"},
+    {transform:"translateX(6px)"},
+    {transform:"translateX(0)"}
+  ],{duration:300});
+}
+
+function speak(txt){
+  const u=new SpeechSynthesisUtterance(txt);
+  u.pitch=1.2;
+  u.rate=1.05;
+  speechSynthesis.speak(u);
+}
+
+document.addEventListener("click",start,{once:true});
+document.addEventListener("touchstart",start,{once:true});
+</script>
+
+</body>
+</html>
